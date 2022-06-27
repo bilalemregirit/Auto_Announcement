@@ -13,4 +13,7 @@ Schematic of the project:
       - Arduino Nano / Mini(5v)
       - DF Player Mini
       - SD card (at least 2gb)
-      - 3.5mm Jack input      
+      - 3.5mm Jack input   
+      
+BASİC PCB DESİGN OF CARD:
+![untitled2](https://user-images.githubusercontent.com/60060887/175928738-212f4597-2feb-4142-bfca-90d5eb1ed512.png)

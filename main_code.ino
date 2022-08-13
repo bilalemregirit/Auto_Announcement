@@ -1,4 +1,4 @@
-##include "Arduino.h"
+#include "Arduino.h"
 #include "TinyGPS.h"
 #include "SoftwareSerial.h"
 #include "DFRobotDFPlayerMini.h"
@@ -14,6 +14,16 @@
  * 0008.mp3 -   8  - HEYBELİADA
  * 0009.mp3 -   9  - BÜYÜKADA
  * 0010.mp3 -  10  - SİGARA 
+ * 0011.mp3 -  10  - SİGARA 
+ * 0012.mp3 -  10  - SİGARA 
+ * 0013.mp3 -  10  - SİGARA 
+ * 0014.mp3 -  10  - SİGARA 
+ * 0015.mp3 -  10  - SİGARA 
+ * 0016.mp3 -  10  - SİGARA 
+ * 0017.mp3 -  10  - SİGARA 
+ * 0018.mp3 -  10  - SİGARA 
+ * 0019.mp3 -  10  - SİGARA 
+ * 0020.mp3 -  10  - SİGARA 
  */
 TinyGPS gps;
 SoftwareSerial ssgps(4, 3); //rx tx
@@ -21,112 +31,60 @@ SoftwareSerial ssplayer(10, 11); // RX, TX
 U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_DEV_0|U8G_I2C_OPT_NO_ACK|U8G_I2C_OPT_FAST);
 DFRobotDFPlayerMini player;
   float flat, flon;
-  int anons_sayac = 0;
-  int ses_dosya;
-  int button_sayac2 =0;
-  int button_sayac1 =0;
-  int current_page1 =0;
-  int current_page2 =0;
-  int menu_swap = 0;
-  int sefer_no;
-  int volume=16;
+  uint8_t anons_sayac = 0;
+  uint8_t ses_dosya;
+  uint8_t button_sayac2 =0;
+  uint8_t button_sayac1 =1;
+  uint8_t current_page1 =0;
+  uint8_t current_page2 =0;
+  uint8_t menu_swap = 1;
+  uint8_t sefer_no;
+  uint8_t sigara_anons_no; 
+  uint8_t volume=25;
+  uint8_t ekran_koruyucu_sure;
   float current_loc[2];
-  int goruntu_sayac =1;
+  uint8_t goruntu_sayac =1;
   long ekran_koruyucu;
+  long kayan_yazi;
+  long timer1;
+  uint8_t konum_no;
   
  
  float Uskudar_iskele[]= {41.027217994892446, 29.01372839057748,41.02895214760056, 29.0161689187923};
  float Besiktas_iskele[]={41.03548691051261, 29.002465570306633,41.04208892352286, 29.009748793486658};  
  float Kabatas_iskele[]={41.03163795571091, 28.9910089244191,41.03854037283602, 28.999265559997532};  
- float Kadikoy_iskele[]={40.988788863418215, 29.01305777796483,40.995898991450574, 29.025116990081813};
+ float Kadikoy_iskele[]={40.98950422380814, 29.014312701382195,40.99434691574612, 29.0241617732726};
+ float Eminonu_iskele[] = {41.01648010295696, 28.97366558469026,41.020463971063556, 28.983527946406113};
  float Bizim_ev_konum[]={41.01320994453465, 29.02247559580991,41.01378517610856, 29.023098102779393};    
- float denemekonum_1 [] ={ 41.04095345646132, 29.008002022589267, 41.04142246629378, 29.008764837850528 };
- float denemekonum_2 [] ={ 41.04107877925389, 29.009353942705765 , 41.04181172292837, 29.01049187174237 };
- float sigarakonum_1 [] ={ 41.01731327139809, 28.995139641802037 , 41.02522248918977, 29.00730858292561 };
+ float Kinaliada_iskele[]={40.907163934878525, 29.051784355259848,40.91913462942703, 29.062101904181475};    
+ float Burgazada_iskele[]={40.87927305179468, 29.067910566555568,40.887283177645905, 29.074210306836868};    
+ float Heybeliada_iskele[]={40.8743194408761, 29.09723371727601,40.88442693823291, 29.10566658170427};    
+ float Buyukada_iskele[]={40.87148983581885, 29.1215669068439,40.879321174647124, 29.129542212535682};    
+
+
+const uint8_t wifi_on [] PROGMEM = {
+  0x00, 0x3c, 0x42, 0xbd, 0x42, 0x18, 0x18, 0x00
+};
+const uint8_t ses_on [] PROGMEM = {
+  0x02, 0x09, 0x65, 0xe5, 0xe5, 0x65, 0x09, 0x02
+};
+const uint8_t asagi [] PROGMEM = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xfe, 0x7f, 0xfc, 0x3f, 0xf8, 0x1f, 0xf0, 
+  0x0f, 0xe0, 0x07, 0xc0, 0x03, 0x80, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+const uint8_t yukari [] PROGMEM = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x03, 0x80, 0x07, 0xc0, 0x0f, 0xe0, 
+  0x1f, 0xf0, 0x3f, 0xf8, 0x7f, 0xfc, 0xff, 0xfe, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
 const uint8_t dentur_logo [] PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xf8, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xf0, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xe0, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xff, 0xff, 0xff, 0xc0, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1f, 0xff, 0xff, 0xfe, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfc, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xf8, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xff, 0xff, 0xff, 0xf0, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xe0, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x03, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xc0, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x7f, 0xfe, 0x00, 0x3f, 0xff, 0xff, 0xff, 0xff, 0xfe, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x0f, 0xff, 0xff, 0xf0, 0x03, 0xff, 0xff, 0xff, 0xff, 0xfc, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x01, 0xfe, 0x00, 0x0f, 0xff, 0x00, 0x3f, 0xff, 0xff, 0xff, 0xf8, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1f, 0xf0, 0x01, 0xff, 0xff, 0xff, 0xf0, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xff, 0x00, 0x03, 0xff, 0xff, 0xe0, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x07, 0xff, 0xc0, 0x00, 0x3f, 0xf8, 0x00, 0x07, 0xff, 0xc0, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x07, 0xff, 0xff, 0xff, 0x00, 0x07, 0xff, 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x1f, 0xf0, 0x00, 0x1f, 0xff, 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xff, 0x00, 0x01, 0xff, 0xff, 0xff, 0xfe, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1f, 0xf0, 0x00, 0x1f, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1f, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xff, 0xff, 0x00, 0x7f, 0xc0, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3f, 0xff, 0xff, 0xfe, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7f, 0xff, 0xe0, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x01, 0xf0, 0xfc, 0xe3, 0x3f, 0xb9, 0xcf, 0xc0, 0x1f, 0x31, 0xcf, 0xc3, 0xf3, 0xf7, 0x78, 0xfc, 
-  0x03, 0xf8, 0xe9, 0xe7, 0x1c, 0x73, 0xdd, 0xe0, 0x3e, 0x33, 0x9e, 0xc7, 0xf3, 0xf3, 0xf1, 0xfc, 
-  0x07, 0x39, 0xf3, 0xee, 0x3c, 0xe7, 0x99, 0x80, 0x76, 0x37, 0x1d, 0xce, 0x67, 0xc3, 0xe1, 0x98, 
-  0x0e, 0x33, 0xf3, 0xbc, 0x78, 0xef, 0x3f, 0x00, 0xfc, 0x3e, 0x3f, 0x9f, 0xe7, 0xe1, 0xc3, 0xf8, 
-  0x1f, 0xf3, 0x87, 0x38, 0xf1, 0xde, 0x73, 0x01, 0xfc, 0x3c, 0x73, 0x9f, 0xe7, 0xe3, 0x87, 0x38, 
-  0x1f, 0xe7, 0xee, 0x31, 0xe3, 0xf8, 0xe7, 0x03, 0x8c, 0x38, 0xe3, 0x38, 0xc7, 0xc7, 0x0e, 0x30, 
-  0x3f, 0xc7, 0xfe, 0x31, 0xc3, 0xf1, 0xc7, 0x47, 0x0c, 0x30, 0xc3, 0x70, 0xcf, 0xce, 0x1c, 0x30, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+
 };
     
 void setup()
    { 
-
   Serial.begin(9600);
-  ssplayer.begin(9600);  
-  if (!player.begin(ssplayer)) { 
-    Serial.println(F("Unable to begin:"));
-    Serial.println(F("1.Please recheck the connection!"));
-    Serial.println(F("2.Please insert the SD card!"));
-    } /*while(true){
-      delay(0); // Code to compatible with ESP8266 watch dog.
-    }  Serial.println(F("DFPlayer Mini online."));*/
-  Serial.println(F("DFPlayer Mini online."));
+  ssplayer.begin(9600);   
   ssgps.begin(9600);
-  player.volume(16); 
-    
-  
    }
 
  
@@ -166,21 +124,36 @@ void setup()
      }
    }
 
+    int oto_anons_yap(long y)
+   {
+     static unsigned long timer1 = millis();
+     if (millis() - timer1 > y) 
+     {
+     timer1 = millis();
+     player.volume(volume); 
+     player.play(10);
+     Serial.println("SİGARA ANONSU YAPLIYOR");
+     }
+   }
+
+
   int sefer_secimi(int sefer_nu)
   {
     if(sefer_nu ==0) // SEFER YOK
     {
-      }
+     
+    }
+    
     if(sefer_nu ==1) // KADIKÖY BESİKTAS NO. 1
     {
          if(InorOut(Kadikoy_iskele,current_loc)==true)
          {if(anons_sayac < 3)
          {anons_yap(4);
-         Serial.println("kadikoydeyiz");}}            
+         konum_no=4;}}            
          else if(InorOut(Besiktas_iskele,current_loc)==true)
          {if(anons_sayac < 3)
          {anons_yap(1);
-         Serial.println("besiktasayız");}}  
+         konum_no=1;}}  
          else
          {anons_sayac = 0;} 
     }
@@ -190,11 +163,11 @@ void setup()
          if(InorOut(Uskudar_iskele,current_loc)==true)
          {if(anons_sayac < 3)
          {anons_yap(2);
-         Serial.println("uskudardayız");}}            
+         Serial.println("aaaasa");
+         konum_no=2;}}            
          else if(InorOut(Besiktas_iskele,current_loc)==true)
          {if(anons_sayac < 3)
-         {anons_yap(1);
-         Serial.println("besiktasayız");}}      
+         {anons_yap(1);}}      
          else
          {anons_sayac = 0;}     
      }  
@@ -202,28 +175,66 @@ void setup()
      {
          if(InorOut(Kadikoy_iskele,current_loc)==true)
          {if(anons_sayac < 2)
-         {anons_yap(5);
-         Serial.println("kadikoydeyiz");}}            
+         {anons_yap(4);
+         konum_no=4;}}            
          else if(InorOut(Kabatas_iskele,current_loc)==true)
          {if(anons_sayac < 2)
-         {anons_yap(4);
-         Serial.println("kabatastayız");}}      
+         {anons_yap(3);
+         konum_no=3;}}      
          else
          {anons_sayac = 0;}    
      } 
-     if(sefer_nu ==4) // ÜSKÜDAR KABATAŞ NO. 3
+     if(sefer_nu ==4) // ÜSKÜDAR KABATAŞ NO. 4
      {
          if(InorOut(Uskudar_iskele,current_loc)==true)
          {if(anons_sayac < 2)
-         {anons_yap(3);
-         Serial.println("uskudardayız");}}            
+         {anons_yap(2);
+         konum_no=2;}}            
          else if(InorOut(Kabatas_iskele,current_loc)==true)
          {if(anons_sayac < 2)
-         {anons_yap(4);
-         Serial.println("kabatastayız");}}      
+         {anons_yap(3);
+         konum_no=3;}}      
          else
          {anons_sayac = 0;}    
      } 
+      if(sefer_nu ==5) // ADALAR NO. 5
+    {
+         if(InorOut(Besiktas_iskele,current_loc)==true)
+         {if(anons_sayac < 3)
+         {anons_yap(1);
+         konum_no=1;}}            
+         else if(InorOut(Kabatas_iskele,current_loc)==true)
+         {if(anons_sayac < 3)
+         {anons_yap(3);
+         konum_no=1;}}
+         else if(InorOut(Eminonu_iskele,current_loc)==true)
+         {if(anons_sayac < 3)
+         {anons_yap(5);
+         konum_no=1;}}
+         else if(InorOut(Burgazada_iskele,current_loc)==true)
+         {if(anons_sayac < 3)
+         {anons_yap(6);
+         konum_no=1;}}
+         else if(InorOut(Kinaliada_iskele,current_loc)==true)
+         {if(anons_sayac < 3)
+         {anons_yap(7);
+         konum_no=1;}}
+         else if(InorOut(Heybeliada_iskele,current_loc)==true)
+         {if(anons_sayac < 3)
+         {anons_yap(8);
+         konum_no=1;}}
+         else if(InorOut(Buyukada_iskele,current_loc)==true)
+         {if(anons_sayac < 3)
+         {anons_yap(9);
+         konum_no=1;}}
+         else if(InorOut(Kadikoy_iskele,current_loc)==true)
+         {if(anons_sayac < 3)
+         {anons_yap(4);
+         konum_no=1;}}  
+         else
+         {anons_sayac = 0;} 
+    }
+  
   }  
     
 
@@ -231,6 +242,12 @@ void setup()
  {
   
   //##############################  GPS  ##########################################################
+    int year;
+    byte month, day, hour, minute, second, hundredths;
+    unsigned long age2;
+    gps.crack_datetime(&year, &month, &day, &hour, &minute, &second, &hundredths, &age2);
+    int bagli_uydu = gps.satellites();
+    
     unsigned long age;
     gps.f_get_position(&flat, &flon, &age);
    
@@ -238,57 +255,70 @@ void setup()
     current_loc[1] = flon, 6;
   //##############################  GPS  ##########################################################
 
+    
+    smartdelay(100);
+    /*
     Serial.print(current_loc[0],6);
     Serial.print(F(", "));
     Serial.print(current_loc[1],6);
-    Serial.print((",   "));
-    Serial.print(sefer_no);
-    Serial.print((",   "));
-    Serial.print(current_page1);
-    Serial.print((",   "));
-    Serial.print(current_page2);
-    Serial.print((",   "));
-    Serial.println(menu_swap);
-    smartdelay(100);
-
+    Serial.print(F(",   "));
+    Serial.print(F(sefer_no));
+    Serial.print(F(",   "));
+    Serial.print(F(current_page1));
+    Serial.print(F(",   "));
+    Serial.print(F(current_page1));
+    Serial.print(F(",   "));
+    Serial.print(F(menu_swap));
+    Serial.print(F(",   "));
+    Serial.println(F(bagli_uydu));
+    */
    //##############################  SERİAL PORT  ##########################################################
-   
     
    //#############################  BUTTON  ###################################################### 
     if(digitalRead(5)==HIGH)
     {  
-    Serial.println("aaaaaaaaaaaaaaaaaaa");
     button_sayac1++;
-    ekran_koruyucu = 0;
-    delay(20);
+    delay(100);
+    ekran_koruyucu = millis();
     }
 
     if(digitalRead(6)==HIGH)
     {
+    delay(50);
     button_sayac2--;
-    Serial.println("bbbbbbbbbbbbbbbbb");
-    ekran_koruyucu = 0;
+    ekran_koruyucu=millis();
     }
     if(digitalRead(8)==HIGH)
     {
     button_sayac2++;
-    //delay(50);
-    Serial.println("ccccccccccccccccc");
-    ekran_koruyucu = 0;
+    delay(50);
+    ekran_koruyucu=millis();
     }
     if(digitalRead(7)==HIGH)
-    {
-    //delay(50);
+    { 
     button_sayac1--;
-    Serial.println("eeeeeeeeeeeeeeeeee");
-    ekran_koruyucu = 0;
+    ekran_koruyucu=millis();
+    delay(100);
     }
     
-    
-    menu_swap = button_sayac1 % 2;
+    static unsigned long ekran_koruyucu = millis(); 
+    if (millis() - ekran_koruyucu > 300000) 
+     {
+     current_page1=0;
+     menu_swap=1;
+      if(digitalRead(5)==HIGH||
+         digitalRead(6)==HIGH||
+         digitalRead(7)==HIGH||
+         digitalRead(8)==HIGH)
+       {ekran_koruyucu=millis();}
+     }
+     
+     else
+     {
+    menu_swap = button_sayac1 % 3;
     if(menu_swap==0)
     {
-    current_page1 = button_sayac2 % 4;
+    current_page1 = button_sayac2 % 5;
     current_page2 = 0;
     }
     if(menu_swap==1)
@@ -300,23 +330,379 @@ void setup()
     {button_sayac1=0;}
     if(button_sayac2<0)
     {button_sayac2=0;}
+     }
+     
     //#############################  BUTTON  ###################################################### 
+    timer1=millis();
+    kayan_yazi = 10000000-(timer1 / 100);     
+    //##############################  ANONSLAR  #######################################################
 
+          if(current_page1==1 &&
+             current_page2==0 &&
+             menu_swap==2)
+           {
+               sefer_no=1;
+               u8g.firstPage();  
+               do {
+               //u8g.setFont(u8g_font_courB14);
+               u8g.drawStr( 45, 15, "SEFER");
+               u8g.drawStr( 35, 35, "KAD-BES");
+               u8g.drawStr( 25, 55, "AYARLANDI");
+               } 
+               while( u8g.nextPage() );  
+               delay(3000);
+               button_sayac1=button_sayac1+2;         
+           }
 
+           
+          if(current_page1==1 &&
+             current_page2==1 &&
+             menu_swap==2)
+           {
+               sefer_no=2;
+               u8g.firstPage();  
+               do {
+               u8g.drawStr( 45, 15, "SEFER");
+               u8g.drawStr( 35, 35, "USK-BES");
+               u8g.drawStr( 25, 55, "AYARLANDI");
+               } 
+               while( u8g.nextPage() );  
+               delay(3000); 
+               button_sayac1=button_sayac1+2;             
+           }
+
+           
+          if(current_page1==1 &&
+             current_page2==2 &&
+             menu_swap==2)
+           {
+               sefer_no=3;
+               u8g.firstPage();  
+               do {
+                u8g.drawStr( 45, 15, "SEFER");
+               u8g.drawStr( 35, 35, "KAD-KAB");
+               u8g.drawStr( 25, 55, "AYARLANDI");
+               } 
+               while( u8g.nextPage() );  
+               delay(3000); 
+               button_sayac1=button_sayac1+2;              
+           }
+
+           
+           if(current_page1==1 &&
+             current_page2==3 &&
+             menu_swap==2)
+           {
+               sefer_no=4;
+               u8g.firstPage();  
+               do {
+               u8g.drawStr( 45, 15, "SEFER");
+               u8g.drawStr( 35, 35, "USK-KAB");
+               u8g.drawStr( 25, 55, "AYARLANDI");
+               } 
+               while( u8g.nextPage() );  
+               delay(3000);       
+               button_sayac1=button_sayac1+2;        
+           }
+           if(current_page1==1 &&
+             current_page2==4 &&
+             menu_swap==2)
+           {
+               sefer_no=5;
+               u8g.firstPage();  
+               do {
+               u8g.drawStr( 45, 15, "SEFER");
+               u8g.drawStr( 35, 35, "HISAR");
+               u8g.drawStr( 25, 55, "AYARLANDI");
+               } 
+               while( u8g.nextPage() );  
+               delay(3000);       
+               button_sayac1=button_sayac1+2;        
+           }
+           if(current_page1==1 &&
+             current_page2==5 &&
+             menu_swap==2)
+           {
+               sefer_no=6;
+               u8g.firstPage();  
+               do {
+               u8g.drawStr( 45, 15, "SEFER");
+               u8g.drawStr( 35, 35, "ORTABOGAZ");
+               u8g.drawStr( 25, 55, "AYARLANDI");
+               } 
+               while( u8g.nextPage() );  
+               delay(3000);       
+               button_sayac1=button_sayac1+2;        
+           }
+           if(current_page1==1 &&
+             current_page2==6 &&
+             menu_swap==2)
+           {
+               sefer_no=7;
+               u8g.firstPage();  
+               do {
+               u8g.drawStr( 45, 15, "SEFER");
+               u8g.drawStr( 35, 35, "KUCUKSU");
+               u8g.drawStr( 25, 55, "AYARLANDI");
+               } 
+               while( u8g.nextPage() );  
+               delay(3000);       
+               button_sayac1=button_sayac1+2;        
+           }
+           if(current_page1==1 &&
+             current_page2==7 &&
+             menu_swap==2)
+           {
+               sefer_no=8;
+               u8g.firstPage();  
+               do {
+               u8g.drawStr( 45, 15, "SEFER");
+               u8g.drawStr( 35, 35, "SARIYER");
+               u8g.drawStr( 25, 55, "AYARLANDI");
+               } 
+               while( u8g.nextPage() );  
+               delay(3000);       
+               button_sayac1=button_sayac1+2;        
+           }
+           if(current_page1==1 &&
+             current_page2==8 &&
+             menu_swap==2)
+           {
+               sefer_no=9;
+               u8g.firstPage();  
+               do {
+               u8g.drawStr( 45, 15, "SEFER");
+               u8g.drawStr( 35, 35, "BEYKOZ");
+               u8g.drawStr( 25, 55, "AYARLANDI");
+               } 
+               while( u8g.nextPage() );  
+               delay(3000);       
+               button_sayac1=button_sayac1+2;        
+           }
+           if(current_page1==1 &&
+             current_page2==9 &&
+             menu_swap==2)
+           {
+               sefer_no=10;
+               u8g.firstPage();  
+               do {
+               u8g.drawStr( 45, 15, "SEFER");
+               u8g.drawStr( 35, 35, "ADALAR");
+               u8g.drawStr( 25, 55, "AYARLANDI");
+               } 
+               while( u8g.nextPage() );  
+               delay(3000);       
+               button_sayac1=button_sayac1+2;        
+           }
+           if(current_page1==1 &&
+             current_page2==10 &&
+             menu_swap==2)
+           {
+               sefer_no=11;
+               u8g.firstPage();  
+               do {
+               u8g.drawStr( 45, 15, "SEFER");
+               u8g.drawStr( 35, 35, "BEYKOZ");
+               u8g.drawStr( 25, 55, "AYARLANDI");
+               } 
+               while( u8g.nextPage() );  
+               delay(3000);       
+               button_sayac1=button_sayac1+2;        
+           }
+           if(current_page1==1 &&
+             current_page2==11 &&
+             menu_swap==2)
+           {
+               sefer_no=12;
+               u8g.firstPage();  
+               do {
+               u8g.drawStr( 45, 15, "SEFER");
+               u8g.drawStr( 35, 35, "KAVAK");
+               u8g.drawStr( 25, 55, "AYARLANDI");
+               } 
+               while( u8g.nextPage() );  
+               delay(3000);       
+               button_sayac1=button_sayac1+2;        
+           }
+           if(current_page1==1 &&
+             current_page2==12 &&
+             menu_swap==2)
+           {
+               sefer_no=13;
+               u8g.firstPage();  
+               do {
+               u8g.drawStr( 45, 15, "SEFER");
+               u8g.drawStr( 35, 35, "BEYKOZ");
+               u8g.drawStr( 25, 55, "AYARLANDI");
+               } 
+               while( u8g.nextPage() );  
+               delay(3000);       
+               button_sayac1=button_sayac1+2;        
+           }
+           if(current_page1==1 &&
+             current_page2==13 &&
+             menu_swap==2)
+           {
+               sefer_no=14;
+               u8g.firstPage();  
+               do {
+               u8g.drawStr( 45, 15, "SEFER");
+               u8g.drawStr( 35, 35, "SARIYER");
+               u8g.drawStr( 25, 55, "AYARLANDI");
+               } 
+               while( u8g.nextPage() );  
+               delay(3000);       
+               button_sayac1=button_sayac1+2;        
+           }
+           if(current_page1==1 &&
+             current_page2==14 &&
+             menu_swap==2)
+           {
+               sefer_no=15;
+               u8g.firstPage();  
+               do {
+               u8g.drawStr( 45, 15, "SEFER");
+               u8g.drawStr( 35, 35, "KAD-BES");
+               u8g.drawStr( 25, 55, "AYARLANDI");
+               } 
+               while( u8g.nextPage() );  
+               delay(3000);       
+               button_sayac1=button_sayac1+2;        
+           }
+           if(current_page1==1 &&
+             current_page2==15 &&
+             menu_swap==2)
+           {
+               sefer_no=16;
+               u8g.firstPage();  
+               do {
+               u8g.drawStr( 45, 15, "SEFER");
+               u8g.drawStr( 35, 35, "KAD-BES");
+               u8g.drawStr( 25, 55, "AYARLANDI");
+               } 
+               while( u8g.nextPage() );  
+               delay(3000);       
+               button_sayac1=button_sayac1+2;        
+           }
+           if(current_page1==1 &&
+             current_page2==16 &&
+             menu_swap==2)
+           {
+               sefer_no=17;
+               u8g.firstPage();  
+               do {
+               u8g.drawStr( 45, 15, "SEFER");
+               u8g.drawStr( 35, 35, "KAD-BES");
+               u8g.drawStr( 25, 55, "AYARLANDI");
+               } 
+               while( u8g.nextPage() );  
+               delay(3000);       
+               button_sayac1=button_sayac1+2;        
+           }
+           
+           if(current_page1==1 &&
+             current_page2==17 &&
+             menu_swap==2)
+           {
+               sefer_no=18;
+               u8g.firstPage();  
+               do {
+               u8g.drawStr( 45, 15, "SEFER");
+               u8g.drawStr( 35, 35, "KAD-BES");
+               u8g.drawStr( 25, 55, "AYARLANDI");
+               } 
+               while( u8g.nextPage() );  
+               delay(3000);       
+               button_sayac1=button_sayac1+2;        
+           }
+
+           if(current_page1==4 &&
+             current_page2==0 &&
+             menu_swap==2)
+           {
+               u8g.firstPage();  
+               do {
+               //u8g.setFont(u8g_font_courB14);
+               u8g.drawStr( 45, 15, "SIGARA");
+               u8g.drawStr( 35, 35, "ANONSU");
+               u8g.drawStr( 25, 55, "YAPILIYOR");
+               } 
+               while( u8g.nextPage() );  
+               player.volume(volume); 
+               player.play(10);
+               delay(3000);       
+               button_sayac1=button_sayac1+2;        
+           }
+           if(current_page1==4 &&
+             current_page2==1 &&
+             menu_swap==2)
+           {
+               u8g.firstPage();  
+               do {
+               //u8g.setFont(u8g_font_courB14);
+               u8g.drawStr( 45, 15, "TAHLIYE");
+               u8g.drawStr( 35, 35, "ANONSU");
+               u8g.drawStr( 25, 55, "YAPILIYOR");
+               } 
+               while( u8g.nextPage() );  
+               player.volume(volume); 
+               player.play(6);
+               delay(3000);       
+               button_sayac1=button_sayac1+2;        
+           }
+     //##############################  ANONSLAR  #######################################################
+
+      //########### OTO ANONSLAR #################
+      if(
+         InorOut(Kadikoy_iskele,current_loc)==false &&
+         InorOut(Besiktas_iskele,current_loc)==false &&
+         InorOut(Uskudar_iskele,current_loc)==false &&
+         InorOut(Kabatas_iskele,current_loc)==false ||
+         anons_sayac>=2  
+        )
+         {
+                             switch (sigara_anons_no) 
+                             {
+                               case 1:
+                                   oto_anons_yap(300000);
+                                   break;
+                               case 2:
+                                   oto_anons_yap(600000);
+                                   break;
+                               case 3:
+                                   oto_anons_yap(900000);
+                                   break;
+                               case 4:
+                                   oto_anons_yap(1200000);
+                                   break;
+                               case 5:
+                                   oto_anons_yap(1800000);
+                                   break;
+                               case 6:
+                                   oto_anons_yap(2700000);
+                                   break;
+                               case 7:
+                                   oto_anons_yap(3600000);
+                                   break;
+                             }
+          
+          }
+      
+      
+      //########### OTO ANONSLAR #################
     
-    //##############################  OLED  ####################################################### 
     
+    //##############################  OLED  #######################################################
     
  if(goruntu_sayac==0)
    {
    u8g.firstPage();  
    do {
-    u8g.setFont(u8g_font_courB14);
-    u8g.drawStr( 35, 25, "NESET");
-    u8g.drawStr( 2, 43, "GIRITLIOGLU");
+
+
     goruntu_sayac = 1;
    } while( u8g.nextPage() );
-   delay(3000);
+   
    
    }
    
@@ -359,19 +745,98 @@ void setup()
                             while( u8g.nextPage() );
                        }             
                                                                                                   
-                                    if(menu_swap==1)
-                                    {
-                                    current_page1 = 0;
-                                    current_page2 = button_sayac2 % 5;
-                                    u8g.firstPage();  
-                                    do {         
-                                    u8g.setFont(u8g_font_unifont);  
-                                    u8g.drawStr( 1, 13, "Ana Ekran"); 
-                                    u8g.setFont(u8g_font_unifont);  
-                                    u8g.drawStr( 5, 23, "YAPILACAK");   
-                                    }
-                                    while( u8g.nextPage() );                                          
-                                    }         
+                                if(menu_swap==1 || menu_swap==2)
+                                {   
+
+
+                                    
+                                                  current_page1 = 0;
+                                                  current_page2 = button_sayac2 % 5;
+                                                  u8g.firstPage();  
+                                                  do {
+                                                      if(int(current_loc[0])==1000 && int(current_loc[1])==1000)
+                                                      {
+                                                      u8g.drawLine(1,5,128,5);
+                                                      u8g.drawStr(25,22,"! DIKKAT !");
+                                                     // u8g.setFont(u8g_font_courB14);
+                                                      u8g.drawStr(kayan_yazi, 45, "SINYAL YOK SINYAL YOK ");
+                                                      u8g.drawLine(1,53,128,53);
+                                                      u8g.setFont(u8g_font_unifont);                                                      
+                                                      }
+                                                      else
+                                                      {      
+                                                             u8g.drawLine(1,13,128,13);
+                                                             u8g.setPrintPos(1, 10);
+                                                             u8g.print(hour+3);
+                                                             u8g.setPrintPos(22, 10);
+                                                             u8g.print(minute);
+                                                             u8g.drawStr(16,10,":");
+                                                             u8g.drawBitmapP( 105, 1, 1, 8, wifi_on);
+                                                             u8g.setPrintPos(115,10);                                                            
+                                                             u8g.print(gps.satellites());
+                                                             u8g.drawBitmapP( 72, 1, 1, 8, ses_on);
+                                                             u8g.setPrintPos(84,10);
+                                                             u8g.print(volume);
+                                                             u8g.setFont(u8g_font_unifont);
+                                                             if(sefer_no==0)
+                                                             {
+                                                             u8g.drawStr(kayan_yazi,35,"Aktif Sefer Yok Aktif Sefer Yok ");           
+                                                             }
+                                                             if(sefer_no==1)
+                                                             {
+                                                             u8g.drawStr(kayan_yazi,35,"Secili Sefer: KADIKOY-BESIKTAS ");           
+                                                             }
+                                                             if(sefer_no==2)
+                                                             {
+                                                             u8g.drawStr(kayan_yazi,35,"Secili Sefer: USKUDAR-BESIKTAS ");           
+                                                             }
+                                                             if(sefer_no==3)
+                                                             {
+                                                             u8g.drawStr(kayan_yazi,35,"Secili Sefer: KADIKOY-KABATAS ");           
+                                                             }
+                                                             if(sefer_no==4)
+                                                             {
+                                                             u8g.drawStr(kayan_yazi,35,"Secili Sefer: USKUDAR-KABATAS ");           
+                                                             }
+                                                             if(sefer_no==5)
+                                                             {
+                                                             u8g.drawStr(kayan_yazi,35,"Secili Sefer: DENTUR-ADALAR ");           
+                                                             }
+                                                            
+
+                                                              switch (sigara_anons_no) 
+                                                              {
+                                                              case 0:
+                                                                 u8g.drawStr(kayan_yazi+80,55," Otomatik Anons Yok");
+                                                                 break;
+                                                              case 1:
+                                                                 u8g.drawStr(kayan_yazi+80,55," 5 Dakikada Bir Sigara Anonsu");
+                                                                 break;
+                                                              case 2:
+                                                                 u8g.drawStr(kayan_yazi+80,55,"10 Dakikada Bir Sigara Anonsu");
+                                                                 break;
+                                                              case 3:
+                                                                 u8g.drawStr(kayan_yazi+80,55,"15 Dakikada Bir Sigara Anonsu");
+                                                                 break;
+                                                              case 4:
+                                                                 u8g.drawStr(kayan_yazi+80,55,"20 Dakikada Bir Sigara Anonsu");
+                                                                 break;
+                                                              case 5:
+                                                                 u8g.drawStr(kayan_yazi+80,55,"30 Dakikada Bir Sigara Anonsu");
+                                                                 break;
+                                                              case 6:
+                                                                 u8g.drawStr(kayan_yazi+80,55,"45 Dakikada Bir Sigara Anonsu");
+                                                                 break;
+                                                              case 7:
+                                                                 u8g.drawStr(kayan_yazi+80,55,"60 Dakikada Bir Sigara Anonsu");
+                                                                 break;
+                                                              }
+                                                             
+                                                                         
+                                                     }                     
+                                                  } while( u8g.nextPage() );  
+                                    }                                       
+                                }         
                  }
 
                   if(current_page1 ==1)      //SEFER SECİMİ
@@ -381,7 +846,6 @@ void setup()
                             u8g.firstPage();  
                             do {
                             int u = 0;
-                            u8g.setFont(u8g_font_unifont);
                             //u8g.drawLine(1,0-u,128,0-u);
                             u8g.drawStr( 1, 13-u, "Ana Ekran");
                             u8g.drawLine(1,16-u,128,16-u);
@@ -398,14 +862,14 @@ void setup()
                                    if(menu_swap==1)
                                  {
                                      current_page1 = 1;
-                                     current_page2 = button_sayac2 % 5;
+                                     current_page2 = button_sayac2 % 18;
     // KADIKÖY BESİKTAS                                  
                                          if(current_page2==0)  
                                         {
                                                u8g.firstPage();  
                                                do {
                                                int u = 0;
-                                               u8g.setFont(u8g_font_unifont);
+                                              
                                                u8g.drawLine(1,0-u,128,0-u);
                                                u8g.drawStr( 1, 13-u, "Kadikoy-Besiktas");
                                                u8g.drawLine(1,16-u,128,16-u);
@@ -417,19 +881,7 @@ void setup()
                                                //u8g.drawLine(1,64-u,128,64-u);
                                                }
                                                while( u8g.nextPage() );   
-                                                                          if(digitalRead(5)==HIGH)
-                                                                          {
-                                                                             sefer_no=1;
-                                                                             u8g.firstPage();  
-                                                                             do {
-                                                                             u8g.setFont(u8g_font_courB14);
-                                                                             u8g.drawStr( 33, 25, "SEFER");
-                                                                             u8g.drawStr( 24, 43, "KAD-BES");
-                                                                             } 
-                                                                             while( u8g.nextPage() );  
-                                                                             delay(3000);
-                                                                          }
-                                                                                  
+               
                                         }
       // USKUDAR-BESİKTAS                                    
                                          if(current_page2==1)
@@ -437,7 +889,7 @@ void setup()
                                                u8g.firstPage();  
                                                do {
                                                int u = 0;
-                                               u8g.setFont(u8g_font_unifont);
+                                              
                                                //u8g.drawLine(1,0-u,128,0-u);
                                                u8g.drawStr( 1, 13-u, "Kadikoy-Besiktas");
                                                u8g.drawLine(1,16-u,128,16-u);
@@ -449,18 +901,7 @@ void setup()
                                                //u8g.drawLine(1,64-u,128,64-u);
                                                }
                                                while( u8g.nextPage() );  
-                                                                           if(digitalRead(5)==HIGH)
-                                                                          {
-                                                                            sefer_no=2;
-                                                                            u8g.firstPage();  
-                                                                             do {
-                                                                             u8g.setFont(u8g_font_courB14);
-                                                                             u8g.drawStr( 33, 25, "SEFER");
-                                                                             u8g.drawStr( 24, 43, "USK-BES");
-                                                                             } 
-                                                                             while( u8g.nextPage() );  
-                                                                             delay(3000);  
-                                                                          }                                    
+                                                                                                              
                                         } 
        // KADIKOY-KABATAS 
                                           if(current_page2==2)
@@ -468,62 +909,363 @@ void setup()
                                                u8g.firstPage();  
                                                do {
                                                int u = 0;
-                                               u8g.setFont(u8g_font_unifont);
                                                //u8g.drawLine(1,0-u,128,0-u);
-                                               u8g.drawStr( 1, 13-u, "Kadikoy-Besiktas");
+                                               u8g.drawStr( 1, 13-0, "Kadikoy-Besiktas");
                                                //u8g.drawLine(1,16-u,128,16-u);
-                                               u8g.drawStr( 1, 29-u, "Uskudar-Besiktas");
-                                               u8g.drawLine(1,32-u,128,32-u);
-                                               u8g.drawStr( 1, 45-u, "Kadikoy-Kabatas");
-                                               u8g.drawLine(1,48-u,128,48-u);
-                                               u8g.drawStr( 1, 61-u, "Uskudar-Kabatas");
+                                               u8g.drawStr( 1, 29-0, "Uskudar-Besiktas");
+                                               u8g.drawLine(1,32-0,128,32-0);
+                                               u8g.drawStr( 1, 45-0, "Kadikoy-Kabatas");
+                                               u8g.drawLine(1,48-0,128,48-0);
+                                               u8g.drawStr( 1, 61-0, "Uskudar-Kabatas");
                                                //u8g.drawLine(1,64-u,128,64-u);
                                                }
                                                while( u8g.nextPage() );  
-                                                                           if(digitalRead(5)==HIGH)
-                                                                          {
-                                                                            sefer_no=3;
-                                                                            u8g.firstPage();  
-                                                                             do {
-                                                                             u8g.setFont(u8g_font_courB14);
-                                                                             u8g.drawStr( 33, 25, "SEFER");
-                                                                             u8g.drawStr( 24, 43, "KAD-KAB");
-                                                                             } 
-                                                                             while( u8g.nextPage() );  
-                                                                             delay(3000);    
-                                                                          }                                    
+                                                                                                             
                                         }
       // USKUDAR-KABATAS
                                           if(current_page2==3)
                                         {
                                                u8g.firstPage();  
                                                do {
-                                                int u = 14;
-                                                u8g.setFont(u8g_font_unifont);
+
+                                              
                                                 //u8g.drawLine(1,0-u,128,0-u);
-                                                u8g.drawStr( 1, 13-u, "Kadikoy-Besiktas");
+                                                u8g.drawStr( 1, 13-14, "Kadikoy-Besiktas");
                                                 //u8g.drawLine(1,16-u,128,16-u);
-                                                u8g.drawStr( 1, 29-u, "Uskudar-Besiktas");
+                                                u8g.drawStr( 1, 29-14, "Uskudar-Besiktas");
                                                 //u8g.drawLine(1,32-u,128,32-u);
-                                                u8g.drawStr( 1, 45-u, "Kadikoy-Kabatas");
-                                                u8g.drawLine(1,48-u,128,48-u);
-                                                u8g.drawStr( 1, 61-u, "Uskudar-Kabatas");
-                                                u8g.drawLine(1,64-u,128,64-u);
+                                                u8g.drawStr( 1, 45-14, "Kadikoy-Kabatas");
+                                                u8g.drawLine(1,48-14,128,48-14);
+                                                u8g.drawStr( 1, 61-14, "Uskudar-Kabatas");
+                                                u8g.drawLine(1,63-14,128,63-14);
+                                                u8g.drawStr( 1, 76-14, "Dentur Adalar");
+                                                //u8g.drawLine(1,77-u,128,77-u);
                                                 }
                                                 while( u8g.nextPage() );  
-                                                                           if(digitalRead(5)==HIGH)
-                                                                          {
-                                                                            sefer_no=4;
-                                                                            u8g.firstPage();  
-                                                                             do {
-                                                                             u8g.setFont(u8g_font_courB14);
-                                                                             u8g.drawStr( 33, 25, "SEFER");
-                                                                             u8g.drawStr( 24, 43, "USK-KAB");
-                                                                             } 
-                                                                             while( u8g.nextPage() );  
-                                                                             delay(3000);      
-                                                                          }                                    
+                                                                                                            
+                                        }
+     //DENTUR ADALAR
+                                            if(current_page2==4)
+                                        {
+                                               u8g.firstPage();  
+                                               do {
+
+                                                
+                                                //u8g.drawLine(1,0-u,128,0-u);
+                                                u8g.drawStr( 1, 13-28, "Kadikoy-Besiktas");
+                                                //u8g.drawLine(1,16-u,128,16-u);
+                                                u8g.drawStr( 1, 29-28, "Uskudar-Besiktas");
+                                                //u8g.drawLine(1,32-u,128,32-u);
+                                                u8g.drawStr( 1, 45-28, "Kadikoy-Kabatas");
+                                                //u8g.drawLine(1,48-u,128,48-u);
+                                                u8g.drawStr( 1, 61-28, "Uskudar-Kabatas");
+                                                u8g.drawLine(1,63-28,128,63-28);
+                                                u8g.drawStr( 1, 76-28, "Dentur Adalar");
+                                                u8g.drawLine(1,77-28,128,77-28);
+                                                u8g.drawStr( 1, 91-28, "3 No. Hisar");
+                                                }
+                                                while( u8g.nextPage() );  
+                                                                                                            
                                         } 
+                                           if(current_page2==5)
+                                        {
+       //3no Hisar
+                                               u8g.firstPage();  
+                                               do {
+
+                                               
+                                                //u8g.drawLine(1,0-u,128,0-u);
+                                                u8g.drawStr( 1, 13-28, "Uskudar-Besiktas");
+                                                //u8g.drawLine(1,16-u,128,16-u);
+                                                u8g.drawStr( 1, 29-28, "Kadikoy-Kabatas");
+                                                //u8g.drawLine(1,32-u,128,32-u);
+                                                u8g.drawStr( 1, 45-28, "Uskudar-Kabatas");
+                                                //u8g.drawLine(1,48-u,128,48-u);
+                                                u8g.drawStr( 1, 61-28, "Dentur Adalar");
+                                                u8g.drawLine(1,63-28,128,63-28);
+                                                u8g.drawStr( 1, 76-28, "3 No. Hisar");
+                                                u8g.drawLine(1,77-28,128,77-28);
+                                                u8g.drawStr( 1, 91-28, "6 No. Ortabogaz");
+                                                }
+                                                while( u8g.nextPage() );  
+                                                                                                            
+                                        }
+                                           if(current_page2==6)
+                                        {
+          //6no Ortabogaz                                 
+                                               u8g.firstPage();  
+                                               do {
+
+                                               
+                                                //u8g.drawLine(1,0-u,128,0-u);
+                                                u8g.drawStr( 1, 13-28, "Kadikoy-Kabatas");
+                                                //u8g.drawLine(1,16-u,128,16-u);
+                                                u8g.drawStr( 1, 29-28, "Uskudar-Kabatas");
+                                                //u8g.drawLine(1,32-u,128,32-u);
+                                                u8g.drawStr( 1, 45-28, "Dentur Adalar");
+                                                //u8g.drawLine(1,48-u,128,48-u);
+                                                u8g.drawStr( 1, 61-28, "3 No. Hisar");
+                                                u8g.drawLine(1,63-28,128,63-28);
+                                                u8g.drawStr( 1, 76-28, "6 No. Ortabogaz");
+                                                u8g.drawLine(1,77-28,128,77-28);
+                                                u8g.drawStr( 1, 91-28, "7 No. Kucuksu");
+                                                }
+                                                while( u8g.nextPage() );  
+                                                                                                            
+                                        }
+                                           if(current_page2==7)
+                                        {
+           //7no Kucuksu                               
+                                               u8g.firstPage();  
+                                               do {
+
+                                      
+                                                //u8g.drawLine(1,0-u,128,0-u);
+                                                u8g.drawStr(1, 13-28, "Uskudar-Kabatas");
+                                                //u8g.drawLine(1,16-u,128,16-u);
+                                                u8g.drawStr( 1, 29-28, "Dentur Adalar");
+                                                //u8g.drawLine(1,32-u,128,32-u);
+                                                u8g.drawStr( 1, 45-28, "3 No. Hisar");
+                                                //u8g.drawLine(1,48-u,128,48-u);
+                                                u8g.drawStr( 1, 61-28, "6 No. Ortabogaz");
+                                                u8g.drawLine(1,63-28,128,63-28);
+                                                u8g.drawStr( 1, 76-28, "7 No. Kucuksu");
+                                                u8g.drawLine(1,77-28,128,77-28);
+                                                u8g.drawStr( 1, 91-28, "8 No. Sariyer");
+                                                }
+                                                while( u8g.nextPage() );  
+                                                                                                            
+                                        }
+                                           if(current_page2==8)
+                                        {
+                                          
+                                               u8g.firstPage();  
+                                               do {
+
+                                               
+                                                //u8g.drawLine(1,0-u,128,0-u);
+                                                u8g.drawStr( 1, 13-28, "Dentur Adalar");
+                                                //u8g.drawLine(1,16-u,128,16-u);
+                                                u8g.drawStr( 1, 29-28, "3 No. Hisar");
+                                                //u8g.drawLine(1,32-u,128,32-u);
+                                                u8g.drawStr( 1, 45-28, "6 No. Ortabogaz");
+                                                //u8g.drawLine(1,48-u,128,48-u);
+                                                u8g.drawStr( 1, 61-28, "7 No. Kucuksu");
+                                                u8g.drawLine(1,63-28,128,63-28);
+                                                u8g.drawStr( 1, 76-28, "8 No. Sariyer");
+                                                u8g.drawLine(1,77-28,128,77-28);
+                                                u8g.drawStr( 1, 91-28, "9 No. Beykoz");
+                                                }
+                                                while( u8g.nextPage() );  
+                                                                                                            
+                                        }
+                                           if(current_page2==9)
+                                        {
+                                          
+                                               u8g.firstPage();  
+                                               do {
+
+                                              
+                                                //u8g.drawLine(1,0-u,128,0-u);
+                                                u8g.drawStr( 1, 13-28, "3 No. Hisar");
+                                                //u8g.drawLine(1,16-u,128,16-u);
+                                                u8g.drawStr( 1, 29-28, "6 No. Ortabogaz");
+                                                //u8g.drawLine(1,32-u,128,32-u);
+                                                u8g.drawStr( 1, 45-28, "7 No. Kucuksu");
+                                                //u8g.drawLine(1,48-u,128,48-u);
+                                                u8g.drawStr( 1, 61-28, "8 No. Sariyer");
+                                                u8g.drawLine(1,63-28,128,63-28);
+                                                u8g.drawStr( 1, 76-28, "9 No. Beykoz");
+                                                u8g.drawLine(1,77-28,128,77-28);
+                                                u8g.drawStr( 1, 91-28, "14 No. Adalar");
+                                                }
+                                                while( u8g.nextPage() );  
+                                                                                                            
+                                        }
+                                        if(current_page2==10)
+                                        {
+                                          
+                                               
+                                                u8g.firstPage();  
+                                               do {
+
+                                               
+                                                //u8g.drawLine(1,0-u,128,0-u);
+                                                u8g.drawStr( 1, 13-28, "6 No. Ortabogaz");
+                                                //u8g.drawLine(1,16-u,128,16-u);
+                                                u8g.drawStr( 1, 29-28, "7 No. Kucuksu");
+                                                //u8g.drawLine(1,32-u,128,32-u);
+                                                u8g.drawStr( 1, 45-28, "8 No. Sariyer");
+                                                //u8g.drawLine(1,48-u,128,48-u);
+                                                u8g.drawStr( 1, 61-28, "9 No. Beykoz");
+                                                u8g.drawLine(1,63-28,128,63-28);
+                                                u8g.drawStr( 1, 76-28, "14 No. Adalar");
+                                                u8g.drawLine(1,77-28,128,77-28);
+                                                u8g.drawStr( 1, 91-28, "20 No. Beykoz");
+                                                }
+                                                while( u8g.nextPage() );  
+                                                                               
+                                        }
+                                        if(current_page2==11)
+                                        {
+                                          
+                                               u8g.firstPage();  
+                                               do {
+                                        
+                                                //u8g.drawLine(1,0-u,128,0-u);
+                                                u8g.drawStr( 1, 13-28, "7 No. Kucuksu");
+                                                //u8g.drawLine(1,16-u,128,16-u);
+                                                u8g.drawStr( 1, 29-28, "8 No. Sariyer");
+                                                //u8g.drawLine(1,32-u,128,32-u);
+                                                u8g.drawStr( 1, 45-28, "9 No. Beykoz");
+                                                //u8g.drawLine(1,48-u,128,48-u);
+                                                u8g.drawStr( 1, 61-28, "14 No. Adalar");
+                                                u8g.drawLine(1,63-28,128,63-28);
+                                                u8g.drawStr( 1, 76-28, "20 No. Beykoz");
+                                                u8g.drawLine(1,77-28,128,77-28);
+                                                u8g.drawStr( 1, 91-28, "21 No. Kavak");
+                                                }
+                                                while( u8g.nextPage() );  
+                                                                                                            
+                                        }
+                                        if(current_page2==12)
+                                        {
+                                          
+                                               u8g.firstPage();  
+                                               do {
+                                                
+                                                //u8g.drawLine(1,0-u,128,0-u);
+                                                u8g.drawStr( 1, 13-28, "8 No. Sariyer");
+                                                //u8g.drawLine(1,16-u,128,16-u);
+                                                u8g.drawStr( 1, 29-28, "9 No. Beykoz");
+                                                //u8g.drawLine(1,32-u,128,32-u);
+                                                u8g.drawStr( 1, 45-28, "14 No. Adalar");
+                                                //u8g.drawLine(1,48-u,128,48-u);
+                                                u8g.drawStr( 1, 61-28, "20 No. Beykoz");
+                                                u8g.drawLine(1,63-28,128,63-28);
+                                                u8g.drawStr( 1, 76-28, "21 No. Kavak");
+                                                u8g.drawLine(1,77-28,128,77-28);
+                                                u8g.drawStr( 1, 91-28, "23 No. Beykoz");
+                                                
+                                                }
+                                                while( u8g.nextPage() );  
+                                                                                                            
+                                        }
+                                        if(current_page2==13)
+                                        {
+                                          
+                                               u8g.firstPage();  
+                                               do {
+                                              
+                                                //u8g.drawLine(1,0-u,128,0-u);
+                                                u8g.drawStr( 1, 13-28, "8 No. Sariyer");
+                                                //u8g.drawLine(1,16-u,128,16-u);
+                                                u8g.drawStr( 1, 29-28, "9 No. Beykoz");
+                                                //u8g.drawLine(1,32-u,128,32-u);
+                                                u8g.drawStr( 1, 45-28, "14 No. Adalar");
+                                                //u8g.drawLine(1,48-u,128,48-u);
+                                                u8g.drawStr( 1, 61-28, "20 No. Beykoz");
+                                                u8g.drawLine(1,63-28,128,63-28);
+                                                u8g.drawStr( 1, 76-28, "21 No. Kavak");
+                                                u8g.drawLine(1,77-28,128,77-28);
+                                                u8g.drawStr( 1, 91-28, "23 No. Beykoz");
+                                                }
+                                                while( u8g.nextPage() );  
+                                                                                                            
+                                        }
+                                        if(current_page2==14)
+                                        {
+                                          
+                                               u8g.firstPage();  
+                                               do {
+                                              
+                                                //u8g.drawLine(1,0-u,128,0-u);
+                                                u8g.drawStr( 1, 13-28, "9 No. Beykoz");
+                                                //u8g.drawLine(1,16-u,128,16-u);
+                                                u8g.drawStr( 1, 29-28, "14 No. Adalar");
+                                                //u8g.drawLine(1,32-u,128,32-u);
+                                                u8g.drawStr( 1, 45-28, "20 No. Beykoz");
+                                                //u8g.drawLine(1,48-u,128,48-u);
+                                                u8g.drawStr( 1, 61-28, "21 No. Kavak");
+                                                u8g.drawLine(1,63-28,128,63-28);
+                                                u8g.drawStr( 1, 76-28, "23 No. Beykoz");
+                                                u8g.drawLine(1,77-28,128,77-28);
+                                                u8g.drawStr( 1, 91-28, "24 No. Sariyer");
+                                                }
+                                                while( u8g.nextPage() );  
+                                                                                                            
+                                        }
+                                        if(current_page2==15)
+                                        {
+                                          
+                                               u8g.firstPage();  
+                                               do {
+                                        
+                                                //u8g.drawLine(1,0-u,128,0-u);
+                                                u8g.drawStr( 1, 13-28, "14 No. Adalar");
+                                                //u8g.drawLine(1,16-u,128,16-u);
+                                                u8g.drawStr( 1, 29-28, "20 No. Beykoz");
+                                                //u8g.drawLine(1,32-u,128,32-u);
+                                                u8g.drawStr( 1, 45-28, "21 No. Kavak");
+                                                //u8g.drawLine(1,48-u,128,48-u);
+                                                u8g.drawStr( 1, 61-28, "23 No. Beykoz");
+                                                u8g.drawLine(1,63-28,128,63-28);
+                                                u8g.drawStr( 1, 76-28, "24 No. Sariyer");
+                                                u8g.drawLine(1,77-28,128,77-28);
+                                                u8g.drawStr( 1, 91-28, "Avcılar-Adalar");
+                                                }
+                                                while( u8g.nextPage() );  
+                                                                                                            
+                                        }
+                                        if(current_page2==16)
+                                        {
+                                          
+                                               u8g.firstPage();  
+                                               do {
+                                             
+                                                //u8g.drawLine(1,0-u,128,0-u);
+                                                u8g.drawStr( 1, 13-28, "20 No. Beykoz");
+                                                //u8g.drawLine(1,16-u,128,16-u);
+                                                u8g.drawStr( 1, 29-28, "21 No. Kavak");
+                                                //u8g.drawLine(1,32-u,128,32-u);
+                                                u8g.drawStr( 1, 45-28, "23 No. Beykoz");
+                                                //u8g.drawLine(1,48-u,128,48-u);
+                                                u8g.drawStr( 1, 61-28, "24 No. Sariyer");
+                                                u8g.drawLine(1,63-28,128,63-28);
+                                                u8g.drawStr( 1, 76-28, "Avcilar-Adalar");
+                                                u8g.drawLine(1,77-28,128,77-28);
+                                                u8g.drawStr( 1, 91-28, "Yalova-Adalar");
+                                               
+                                                }
+                                                while( u8g.nextPage() );  
+                                                                                                            
+                                        }
+                                        if(current_page2==17)
+                                        {
+                                          
+                                               u8g.firstPage();  
+                                               do {
+                                                
+                                                //u8g.drawLine(1,0-u,128,0-u);
+                                                u8g.drawStr( 1, 13-28, "20 No. Beykoz");
+                                                //u8g.drawLine(1,16-u,128,16-u);
+                                                u8g.drawStr( 1, 29-28, "21 No. Kavak");
+                                                //u8g.drawLine(1,32-u,128,32-u);
+                                                u8g.drawStr( 1, 45-28, "23 No. Beykoz");
+                                                //u8g.drawLine(1,48-u,128,48-u);
+                                                u8g.drawStr( 1, 61-28, "24 No. Sariyer");
+                                                //u8g.drawLine(1,63-28,128,63-28);
+                                                u8g.drawStr( 1, 76-28, "Avcilar-Adalar");
+                                                u8g.drawLine(1,77-28,128,77-28);
+                                                u8g.drawStr( 1, 91-28, "Yalova-Adalar");
+                                                u8g.drawLine(1,91-28,128,91-28);
+                                                }
+                                                while( u8g.nextPage() );  
+                                                                                                            
+                                        }
+                                        
+                                        
+                                 
                                               
                                   }
                   }
@@ -535,8 +1277,8 @@ void setup()
                       {
                             u8g.firstPage();  
                             do {
-                            int u = 0;
-                            u8g.setFont(u8g_font_unifont);
+                            int u = 14;
+                     
                             //u8g.drawLine(1,0-u,128,0-u);
                             u8g.drawStr( 1, 13-u, "Ana Ekran");
                             //u8g.drawLine(1,16-u,128,16-u);
@@ -546,13 +1288,30 @@ void setup()
                             u8g.drawLine(1,48-u,128,48-u);
                             u8g.drawStr( 1, 61-u, "OtomatikAnonslar");
                             //u8g.drawLine(1,64-u,128,64-u);
+                            u8g.drawStr( 1, 76-u, "Anlik Anonslar");
+                            //u8g.drawLine(1,80-u,128,80-u);
+                            
                             }                 
                             while( u8g.nextPage() );
                       }           
 
-                                             if(menu_swap==1)
-                                             {
-                        
+                                             if(menu_swap==1 || menu_swap==2)
+                                             { current_page1=2;
+                                               current_page2 = button_sayac2 % 31;
+                                               volume = current_page2;
+                                               int volume_screen = current_page2*4;
+                                                 u8g.firstPage();  
+                                                 do {         
+                                                 
+                                                 u8g.drawStr( 26, 18, "SES AYARI");
+                                                 u8g.drawStr(2,53,"0");
+                                                 u8g.drawStr(108,53,"30");
+                                                 u8g.setPrintPos(55, 53);
+                                                 u8g.print(volume);
+                                                 u8g.drawFrame(1,20,124,20); 
+                                                 u8g.drawBox(3,23,volume_screen,14 );
+                                                 }
+                                                 while( u8g.nextPage() );
                         
                                              }
                  }
@@ -560,11 +1319,11 @@ void setup()
                     if(current_page1 ==3)      //OTOMATİK ANONSLAR
                  { 
                     if(menu_swap==0)
-                      {
+                      {     current_page2 =0;
                             u8g.firstPage();  
                             do {
-                            int u = 0;
-                            u8g.setFont(u8g_font_unifont);
+                            int u = 14;
+                 
                             //u8g.drawLine(1,0-u,128,0-u);
                             u8g.drawStr( 1, 13-u, "Ana Ekran");
                             //u8g.drawLine(1,16-u,128,16-u);
@@ -574,14 +1333,148 @@ void setup()
                             u8g.drawLine(1,48-u,128,48-u);
                             u8g.drawStr( 1, 61-u, "OtomatikAnonslar");
                             u8g.drawLine(1,63-u,128,63-u);
+                            u8g.drawStr( 1, 76-u, "Anlik Anonslar");
+                            //u8g.drawLine(1,77-u,128,77-u);
                             }                 
                             while( u8g.nextPage() );
-                      }           
+                      }     
+
+                                                             if(menu_swap==1)
+                                                             {
+                                                              current_page1 = 3;
+                                                              current_page2 = button_sayac2 % 8;
+                                                             u8g.firstPage();  
+                                                             do {
+                                                             u8g.drawStr( 10, 13, "SIGARA ANONSU");
+                                                             u8g.drawLine(1,16,128,16);
+                                                             u8g.drawBitmapP( 5, 20, 2, 16, yukari); 
+                                                             u8g.drawBitmapP( 5, 50, 2, 16, asagi);
+                                                                                 if(current_page2 ==0)
+                                                                                 {
+                                                                                   u8g.drawStr( 5, 48, "Anons Yok");
+                                                                                   sigara_anons_no=0;
+                                                                                  }
+                                                                                  if(current_page2 ==1)
+                                                                                 {
+                                                                                   u8g.drawStr( 5, 48, "5  Dakikada Bir");
+                                                                                   sigara_anons_no=1;
+                                                                                  } 
+                                                                                  if(current_page2 ==2)
+                                                                                 {
+                                                                                   u8g.drawStr( 5, 48, "10 Dakikada Bir");
+                                                                                   sigara_anons_no=2;
+                                                                                  }
+                                                                                  if(current_page2 ==3)
+                                                                                 {
+                                                                                   u8g.drawStr( 5, 48, "15 Dakikada Bir");
+                                                                                   sigara_anons_no=3;
+                                                                                  }
+                                                                                  if(current_page2 ==4)
+                                                                                 {
+                                                                                   u8g.drawStr( 5, 48, "20 Dakikada Bir");
+                                                                                   sigara_anons_no=4;
+                                                                                  }
+                                                                                  if(current_page2 ==5)
+                                                                                 {
+                                                                                   u8g.drawStr( 5, 48, "30 Dakikada Bir");
+                                                                                   sigara_anons_no=5;
+                                                                                  }  
+                                                                                  if(current_page2 ==6)
+                                                                                 {
+                                                                                   u8g.drawStr( 5, 48, "45 Dakikada Bir");
+                                                                                   sigara_anons_no=6;
+                                                                                  }  
+                                                                                  if(current_page2 ==7)
+                                                                                 {
+                                                                                   u8g.drawStr( 5, 48, "60 Dakikada Bir");
+                                                                                   sigara_anons_no=7;
+                                                                                  }         
+                                                             
+                                                             }                 
+                                                             while( u8g.nextPage() );
+                                                             }     
                   }
-            
-        }
- 
-  
+
+
+                  
+                    if(current_page1 ==4)      //ANLIK ANONSLAR
+                 { 
+                   if(menu_swap==0)
+                      {     current_page2=0;
+                            u8g.firstPage();  
+                            do {
+                            int u = 14;
+                            
+                            //u8g.drawLine(1,0-u,128,0-u);
+                            u8g.drawStr( 1, 13-u, "Ana Ekran");
+                            //u8g.drawLine(1,16-u,128,16-u);
+                            u8g.drawStr( 1, 29-u, "Sefer Secimi");
+                            //u8g.drawLine(1,32-u,128,32-u);
+                            u8g.drawStr( 1, 45-u, "Ses Ayari");
+                            //u8g.drawLine(1,48-u,128,48-u);
+                            u8g.drawStr( 1, 61-u, "OtomatikAnonslar");
+                            u8g.drawLine(1,63-u,128,63-u);
+                            u8g.drawStr( 1, 76-u, "Anlik Anonslar");
+                            u8g.drawLine(1,77-u,128,77-u);
+                            }                 
+                            while( u8g.nextPage() );
+                       }
+                                  if(menu_swap==1)
+                                  {  current_page1 = 4;
+                                     current_page2 = button_sayac2 % 4;
+
+                                       if (current_page2==0)
+                                       {  
+                                          u8g.firstPage();  
+                                          do {
+                                          int u = 0;
+                                         
+                                          u8g.drawLine(1,0-u,128,0-u);
+                                          u8g.drawStr( 1, 13-u, "Sigara");
+                                          u8g.drawLine(1,16-u,128,16-u);
+                                          u8g.drawStr( 1, 29-u, "Yolcu Tahliye");
+                                          //u8g.drawLine(1,32-u,128,32-u);
+                                          u8g.drawStr( 1, 45-u, "Kayip Esya");
+                                          //u8g.drawLine(1,48-u,128,48-u);
+                                          }                 
+                                          while( u8g.nextPage() );
+                                        }
+                                        if (current_page2==1)
+                                       {  
+                                          u8g.firstPage();  
+                                          do {
+                                          int u = 0;
+                                         
+                                          //u8g.drawLine(1,0-u,128,0-u);
+                                          u8g.drawStr( 1, 13-u, "Sigara");
+                                          u8g.drawLine(1,16-u,128,16-u);
+                                          u8g.drawStr( 1, 29-u, "Yolcu Tahliye");
+                                          u8g.drawLine(1,32-u,128,32-u);
+                                          u8g.drawStr( 1, 45-u, "Kayip Esya");
+                                          //u8g.drawLine(1,48-u,128,48-u);
+                                          }                 
+                                          while( u8g.nextPage() );
+                                        }
+                                        if (current_page2==2)
+                                       {  
+                                          u8g.firstPage();  
+                                          do {
+                                          int u = 0;
+                                          
+                                          //u8g.drawLine(1,0-u,128,0-u);
+                                          u8g.drawStr( 1, 13-u, "Sigara");
+                                          //u8g.drawLine(1,16-u,128,16-u);
+                                          u8g.drawStr( 1, 29-u, "Yolcu Tahliye");
+                                          u8g.drawLine(1,32-u,128,32-u);
+                                          u8g.drawStr( 1, 45-u, "Kayip Esya");
+                                          u8g.drawLine(1,48-u,128,48-u);
+                                          }                 
+                                          while( u8g.nextPage() );
+                                        }
+                                   }
+                                         
+                 }
+         
   //##############################OLED######################################
 
   sefer_secimi(sefer_no);    

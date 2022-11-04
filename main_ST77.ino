@@ -41,7 +41,7 @@
  */
 TinyGPS gps;
 SoftwareSerial ssgps(4, 3); //rx tx
-SoftwareSerial ssplayer(3, 2); // RX, TX
+SoftwareSerial ssplayer(2, 3); // RX, TX
 DFRobotDFPlayerMini player;
 TFT_ST7735 tft = TFT_ST7735(10,8,9);
 
@@ -56,14 +56,16 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
   uint8_t current_page2 =0;
   uint8_t menu_swap = 1;
   uint8_t sefer_no=0;
-  uint8_t sigara_anons_no=0 ; 
+  uint8_t sigara_anons_no=0; 
   uint8_t volume=25;
   float current_loc[2];
   uint8_t sigara_anons_freq;
   uint8_t ekran_koruyucu;
-  unsigned long timer1=5000;
+  unsigned long timer1;
+  unsigned long timer2;
   uint8_t ok_durum;   
- 
+  uint8_t anaekran_sayac;
+  
  float Uskudar_iskele[]= {41.027217994892446, 29.01372839057748,41.02895214760056, 29.0161689187923};
  float Besiktas_iskele[]={41.03548691051261, 29.002465570306633,41.04208892352286, 29.009748793486658};  
  float Kabatas_iskele[]={41.03163795571091, 28.9910089244191,41.03854037283602, 28.999265559997532};  
@@ -79,14 +81,20 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
 
     
    void setup()
-    { 
+    {ssplayer.begin(9600);  
    Serial.begin(9600);
-   ssplayer.begin(9600);   
+     
    ssgps.begin(9600);
    tft.begin();
    tft.setRotation(2);
    tft.clearScreen();
    tft.setFont(&orbitron14);
+    if (!player.begin(ssplayer)) {  //Use softwareSerial to communicate with mp3.
+    //Serial.println(F("Unable to begin:"));
+    //Serial.println(F("1.Please recheck the connection!"));
+    //Serial.println(F("2.Please insert the SD card!"));    
+  }
+  //Serial.println(F("DFPlayer Mini online."));
     }
 
  
@@ -114,11 +122,12 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
 
 
    int anons_yap(int x)
-   {
+   { Serial.println("ss");
      static unsigned long timer1 = millis();
      if (millis() - timer1 > 40000) 
      {
      timer1 = millis();
+     //Serial.println("aa");
      player.volume(volume); 
      player.play(x);
      anons_sayac ++; 
@@ -134,7 +143,7 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
      timer1 = millis();
      player.volume(volume); 
      player.play(10);
-     //Serial.println("SİGARA ANONSU YAPLIYOR");
+    // Serial.println("SİGARAAAAAA");
      }
    }
 
@@ -159,7 +168,7 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
   {
     if(sefer_nu ==0) // SEFER YOK
     {
-     
+       
     }
     
     if(sefer_nu ==1) // KADIKÖY BESİKTAS NO. 1
@@ -251,6 +260,43 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
          else
          {anons_sayac = 0;} 
     }
+       if(sefer_nu ==6) // SEHIR HATLARI ADALAR NO. 5
+    {
+         if(InorOut(Besiktas_iskele,current_loc)==true)
+         {if(anons_sayac < 3)
+         {anons_yap(1);
+         }}            
+         else if(InorOut(Kabatas_iskele,current_loc)==true)
+         {if(anons_sayac < 3)
+         {anons_yap(3);
+         }}
+         else if(InorOut(Eminonu_iskele,current_loc)==true)
+         {if(anons_sayac < 3)
+         {anons_yap(5);
+         }}
+         else if(InorOut(Burgazada_iskele,current_loc)==true)
+         {if(anons_sayac < 3)
+         {anons_yap(6);
+         }}
+         else if(InorOut(Kinaliada_iskele,current_loc)==true)
+         {if(anons_sayac < 3)
+         {anons_yap(7);
+         }}
+         else if(InorOut(Heybeliada_iskele,current_loc)==true)
+         {if(anons_sayac < 3)
+         {anons_yap(8);
+         }}
+         else if(InorOut(Buyukada_iskele,current_loc)==true)
+         {if(anons_sayac < 3)
+         {anons_yap(9);
+         }}
+         else if(InorOut(Kadikoy_iskele,current_loc)==true)
+         {if(anons_sayac < 3)
+         {anons_yap(4);
+         }}  
+         else
+         {anons_sayac = 0;} 
+    }
   
   }  
 
@@ -258,8 +304,9 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
 
  void loop()
  {
-  
+  timer1=millis();
   //##############################  GPS  ##########################################################
+  
     int year;
     byte month, day, hour, minute, second, hundredths;
     unsigned long age2;
@@ -276,19 +323,19 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
     
     smartdelay(100);
     
-    Serial.print(current_loc[0],6);
+     Serial.print(current_loc[0],6);
     Serial.print(F(", "));
     Serial.println(current_loc[1],6);
-   /*  Serial.print(F(",   "));
-    Serial.print(F(sefer_no));
+   /* Serial.print(F(",   "));
+    Serial.print(sefer_no);
     Serial.print(F(",   "));
     Serial.print(current_page1);
     Serial.print(",   ");
     Serial.print(current_page2);
     Serial.print(",   ");
-    Serial.print(menu_swap);
+    Serial.print(timer1);
     Serial.print(",   "); 
-    Serial.println(volume);*/
+    Serial.println(anaekran_sayac);*/
    
    //##############################  SERİAL PORT  ##########################################################
     
@@ -364,7 +411,7 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
     ok_durum= button_sayac3%2;
   
     //#############################  BUTTON  ###################################################### 
-    timer1=millis()%15000;
+    
          
    
       //########### OTO ANONSLAR #################
@@ -379,7 +426,7 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
                              switch (sigara_anons_no) 
                              {
                                case 1:
-                                   oto_anons_yap(300000);
+                                   oto_anons_yap(300000);//300000
                                    sigara_anons_freq = 5;
                                    break;
                                case 2:
@@ -412,7 +459,7 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
     
     //##############################  OLED  #######################################################
 
-   
+   timer2=timer1%15000;
     
      switch (current_page1) 
      {
@@ -427,7 +474,7 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
                    
                       if(menu_swap==0)
                       {    
-                           timer1=5000;
+                           //timer1=5000;
                            tft.setCursor(22,32);
                            tft.setTextColor(0xFFFF);
                            tft.print(F("Ana Menu"));
@@ -449,17 +496,19 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
                                                                                                   
                                 if(menu_swap==1)
                                 {     
-                                      if (analogRead(A2==LOW)&&
-                                          analogRead(A3== LOW))
-                                          {timer1=timer1+4500;}
-                                        
-                                      if((timer1)%5000<250){
+                                     if((timer2)%10000<250)
+                                     {
+                                      
+                                      anaekran_sayac++;
+                                     }
+                                       
+                                      if((timer2)%5000<250){
                                         tft.clearScreen();
                                         tft.drawLine(0,50,130,50,0xF400);
                                         tft.drawLine(0,51,130,51,0xF400);
                                         tft.drawLine(0,140,130,140,0xF400);
                                         tft.drawLine(0,139,130,139,0xF400);}
-                                      if((timer1)%15000<250){
+                                      if((timer2)%15000<250){
                                         tft.drawIcon(30, 55, &sesduzey, 1, 0xFFFF, BLACK,true);
                                         tft.setCursor(6,113);
                                         tft.setTextColor(0xFFFF);
@@ -468,7 +517,7 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
                                         tft.print(volume);
                                         
                                         }
-                                      if ((timer1+10000)%15000<250)
+                                      if ((timer2+10000)%15000<250)
                                       {
                                         tft.setCursor(19,55);
                                         tft.setTextColor(0xFFFF);
@@ -613,7 +662,7 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
                                                   
                                         }
                                         }
-                                        if ((timer1+5000)%15000<250)
+                                        if ((timer2+5000)%15000<250)
                                        {  
                                          tft.drawIcon(30, 55, &smoke, 1, 0xFFFF, BLACK,true);
                                          tft.setCursor(8,113);
@@ -627,8 +676,8 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
                                        }
                                        
                                       
-                                                  
-                                                                         
+                                                
+                                                                        
                                                   
                                     }                                       
                     break;         
@@ -639,20 +688,20 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
                       {
                            tft.setCursor(22,32);
                            tft.setTextColor(0xFFFF);
-                           tft.print("Ana Menu");
+                           tft.print(F("Ana Menu"));
                            tft.drawLine(0,50,130,50,0xF400);
-                            tft.setCursor(5,50);
-                           tft.print("Bilgi Ekrani");
+                           tft.setCursor(5,50);
+                           tft.print(F("Bilgi Ekrani"));
                            tft.setCursor(5,65);
                            tft.setTextColor(0xF800);
-                           tft.print("Sefer Secimi"); 
+                           tft.print(F("Sefer Secimi")); 
                            tft.setCursor(5,80);
                            tft.setTextColor(0xFFFF);;
-                           tft.print("Ses Ayari"); 
+                           tft.print(F("Ses Ayari")); 
                            tft.setCursor(5,97);
-                           tft.print("Oto Anons"); 
+                           tft.print(F("Oto Anons")); 
                            tft.setCursor(5,114);                           
-                           tft.print("Tek Anons"); 
+                           tft.print(F("Tek Anons")); 
                       }             
                                                                                                   
                                    if(menu_swap==1)
@@ -668,18 +717,18 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
                                         {
                                          case 0:
                                          tft.setCursor(30,70);
-                                         tft.print("Kadikoy");
+                                         tft.print(F("Kadikoy"));
                                          tft.setCursor(27,85);
-                                         tft.print("Besiktas");
+                                         tft.print(F("Besiktas"));
                                          if(analogRead(A5)==LOW)
                                           {sefer_no=1;
                                           sefer_kayit();}  
                                              break;
                                          case 1:
                                          tft.setCursor(30,70);
-                                         tft.print("Uskudar");
+                                         tft.print(F("Uskudar"));
                                          tft.setCursor(28,85);
-                                         tft.print("Besiktas");
+                                         tft.print(F("Besiktas"));
                                          if(analogRead(A5)==LOW)
                                           {sefer_no=2;
                                           sefer_kayit();}  
@@ -687,9 +736,9 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
                                              
                                          case 2:
                                          tft.setCursor(30,70);
-                                         tft.print("Kadikoy");
+                                         tft.print(F("Kadikoy"));
                                          tft.setCursor(28,85);
-                                         tft.print("Kabatas");
+                                         tft.print(F("Kabatas"));
                                          if(analogRead(A5)==LOW)
                                           {sefer_no=3;
                                            sefer_kayit();} 
@@ -697,9 +746,9 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
                                               
                                          case 3:
                                          tft.setCursor(28,70);
-                                         tft.print("Uskudar");
+                                         tft.print(F("Uskudar"));
                                          tft.setCursor(28,85);
-                                         tft.print("Kabatas");
+                                         tft.print(F("Kabatas"));
                                          if(analogRead(A5)==LOW)
                                           {sefer_no=4;
                                           sefer_kayit();}  
@@ -1002,7 +1051,9 @@ TFT_ST7735 tft = TFT_ST7735(10,8,9);
                                                              tft.drawLine(0,50,130,50,0xF400);
                                                              tft.setCursor(5,50);
                                                              if(current_page2==0){tft.setTextColor(0xF800);
-                                                             if(analogRead(A5)==LOW){tft.setTextColor(0x001F);}}
+                                                             if(analogRead(A5)==LOW){tft.setTextColor(0x001F);
+                                                                                     player.volume(volume); 
+                                                                                     player.play(10); }}
                                                              else{tft.setTextColor(0xFFFF);}      
                                                              tft.print("Sigara ");
                                                              tft.setCursor(5,65);

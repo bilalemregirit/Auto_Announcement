@@ -1,6 +1,5 @@
 THE LATEST VERSION OF THE PROJECT
-
-https://www.youtube.com/watch?v=9ex4jSiTSgA&t=38s
+Youtube Video of the Project: https://www.youtube.com/watch?v=9ex4jSiTSgA&t=38s
 ![Ekran görüntüsü 2023-10-05 132101](https://github.com/bilalemregirit/Auto_Announcement_system/assets/60060887/8d35b672-1630-455d-8e45-37a65f3aa210)
 
 

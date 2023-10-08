@@ -9,12 +9,15 @@ THE LATEST VERSION OF THE PROJECT
 # HOW IT WORKS
 
 This is a project that automizes the announcements of the public transportations with the GPS coordinates. 
-And This is how it works: There is a common GPS module inside of the device that indicates the estimated 
+And This is how it works: First i want to start with the hardware of the device
+
+
+
+There is a common GPS module inside of the device that indicates the estimated 
 location. The GPS module is obtaioning and transmitting some values that it gets from sattelites like 
 latitude, logitude. It transmits the value that it got to the micro controller. Inside of the microcontroller,
 there are bunch of coordinate values that indicates spesific areas in the place that the vessel is going to work
-(you can also reach all the coordinates that i used in bosphorus in the link:
-https://www.google.com/maps/d/edit?mid=1s0He0g25t9psiO5dyw2yRAbmQLxdL9c&ll=41.02799237402927%2C29.051695800000008&z=11)
+(you can also reach all the coordinates that i used in bosphorus in the link: rb.gy/ims96)
 
 
 

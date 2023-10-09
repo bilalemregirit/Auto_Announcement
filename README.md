@@ -9,7 +9,12 @@ THE LATEST VERSION OF THE PROJECT
 # HOW IT WORKS
 
 This is a project that automizes the announcements of the public transportations with the GPS coordinates. 
-And This is how it works: First i want to start with the hardware of the device
+And This is how it works: First i want to start with the hardware of the device.
+![image](https://github.com/bilalemregirit/Auto_Announcement/assets/60060887/eaf463e3-062e-45a4-a03c-ce7876c2a655)
+There are bunch of components in the device such as; Dfplayer Mini, this device helps to make announcements, it has 
+sd card socket that keeps all the announcements and it gives audio output to the Aux port when it recieves spesific 
+signal. Arduino Pro Micro keeps all the location data as longitude and latitude and if it recieves gps signals from 
+the gps module. When the device is in the spesific area it transmits signal to the DfPlayer. There is
 
 
 
@@ -18,6 +23,9 @@ location. The GPS module is obtaioning and transmitting some values that it gets
 latitude, logitude. It transmits the value that it got to the micro controller. Inside of the microcontroller,
 there are bunch of coordinate values that indicates spesific areas in the place that the vessel is going to work
 (you can also reach all the coordinates that i used in bosphorus in the link: rb.gy/ims96)
+![image](https://github.com/bilalemregirit/Auto_Announcement/assets/60060887/a27e065c-3d33-49e2-a315-e24402321df5)
+
+
 
 
 
